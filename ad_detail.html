@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ad.title }} - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Images -->
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if ad.images %}
+                    <div id="mainImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in ad.images %}
+                                <div class="carousel-item {{ 'active' if image.is_main else '' }}">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.image_path) }}" class="d-block w-100" alt="{{ ad.title }}" style="height: 400px; object-fit: cover;">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if ad.images|length > 1 %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#mainImageCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#mainImageCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Thumbnails -->
+                    {% if ad.images|length > 1 %}
+                        <div class="row mt-3">
+                            {% for image in ad.images %}
+                                <div class="col-3">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.image_path) }}" class="img-thumbnail" alt="Thumbnail" onclick="showImage({{ loop.index0 }})" style="cursor: pointer; height: 80px; object-fit: cover;">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5 bg-light">
+                        <i class="fas fa-image fa-5x text-muted"></i>
+                        <p class="mt-3 text-muted">Зураг байхгүй</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ad Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>{{ ad.title }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h4 class="text-primary">
+                            {% if ad.price %}
+                                {{ "{:,.0f}".format(ad.price) }} ₮
+                            {% else %}
+                                Үнэ тохирно
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> {{ ad.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </small>
+                    </div>
+                </div>
+                
+                {% if ad.description %}
+                    <div class="mb-4">
+                        <h5>Дэлгэрэнгүй тайлбар</h5>
+                        <p>{{ ad.description|nl2br }}</p>
+                    </div>
+                {% endif %}
+
+                <!-- Category-specific details -->
+                {% if ad.category == 'үл хөдлөх' and ad.real_estate %}
+                    <div class="mb-4">
+                        <h5>Үл хөдлөх хөрөнгөний мэдээлэл</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Талбай:</strong> {{ ad.real_estate.area }} м²</p>
+                                <p><strong>Байршил:</strong> {{ ad.real_estate.location or '-' }}</p>
+                                <p><strong>Өрөө:</strong> {{ ad.real_estate.rooms or '-' }}</p>
+                                <p><strong>Давхар:</strong> {{ ad.real_estate.floor or '-' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Гарааш:</strong> {{ 'Тийм' if ad.real_estate.garage else 'Үгүй' }}</p>
+                                <p><strong>Төлөв:</strong> {{ ad.real_estate.condition or '-' }}</p>
+                                <p><strong>Орсон он:</strong> {{ ad.real_estate.year_built or '-' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif ad.category == 'автомашин' and ad.automobile %}
+                    <div class="mb-4">
+                        <h5>Автомашины мэдээлэл</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Үйлдвэрлэгч:</strong> {{ ad.automobile.manufacturer or '-' }}</p>
+                                <p><strong>Загвар:</strong> {{ ad.automobile.model or '-' }}</p>
+                                <p><strong>Он:</strong> {{ ad.automobile.year or '-' }}</p>
+                                <p><strong>Төрөл:</strong> {{ ad.automobile.type or '-' }}</p>
+                                <p><strong>Моторын багтаамж:</strong> {{ ad.automobile.engine_capacity or '-' }} л</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Хөтлөгч:</strong> {{ ad.automobile.drive_type or '-' }}</p>
+                                <p><strong>Хүрдний байрлал:</strong> {{ ad.automobile.transmission or '-' }}</p>
+                                <p><strong>Түлшний төрөл:</strong> {{ ad.automobile.fuel_type or '-' }}</p>
+                                <p><strong>Хаалганы тоо:</strong> {{ ad.automobile.doors or '-' }}</p>
+                                <p><strong>Гүйлт:</strong> {{ ad.automobile.mileage or '-' }} км</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif ad.category == 'ажил' and ad.job %}
+                    <div class="mb-4">
+                        <h5>Ажлын мэдээлэл</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Салбар:</strong> {{ ad.job.sector or '-' }}</p>
+                                <p><strong>Дэд салбар:</strong> {{ ad.job.sub_sector or '-' }}</p>
+                                <p><strong>Албан тушаал:</strong> {{ ad.job.position or '-' }}</p>
+                                <p><strong>Цалин:</strong> {{ ad.job.salary or '-' }} ₮</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Боловсролын зэрэг:</strong> {{ ad.job.degree or '-' }}</p>
+                                <p><strong>Туршлага:</strong> {{ ad.job.experience or '-' }}</p>
+                                <p><strong>Байршил:</strong> {{ ad.job.location or '-' }}</p>
+                            </div>
+                        </div>
+                        {% if ad.job.requirements %}
+                            <div class="mt-3">
+                                <p><strong>Тавигдах шаардлага:</strong></p>
+                                <p>{{ ad.job.requirements|nl2br }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Seller Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-user"></i> Зар оруулагч</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Нэр:</strong> {{ ad.user.username }}</p>
+                <p><strong>Утас:</strong> {{ ad.phone or ad.user.phone }}</p>
+                {% if ad.user.email %}
+                    <p><strong>И-мэйл:</strong> {{ ad.user.email }}</p>
+                {% endif %}
+                <p><small class="text-muted">Бүртгүүлсэн: {{ ad.user.created_at.strftime('%Y-%m-%d') }}</small></p>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="showContactInfo()">
+                        <i class="fas fa-phone"></i> Холбоо барих
+                    </button>
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-envelope"></i> Имэйл илгээх
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-cog"></i> Үйлдэл</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-warning">
+                        <i class="fas fa-star"></i> Хадгалах
+                    </button>
+                    <button class="btn btn-outline-info">
+                        <i class="fas fa-share"></i> Хуваалцах
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="reportAd()">
+                        <i class="fas fa-flag"></i> Репорт
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Tips -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-shield-alt"></i> Аюулгүй байдлын зөвлөгөө</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Уулзаж барааг үзэж аваарай</li>
+                    <li><i class="fas fa-check text-success"></i> Барааны төлөв байдлыг сайтар шалгаарай</li>
+                    <li><i class="fas fa-check text-success"></i> Гүйлгээг нийтийн газар хийгээрэй</li>
+                    <li><i class="fas fa-times text-danger"></i> Шууд мөнгө шилжүүлэхгүй байх</li>
+                    <li><i class="fas fa-times text-danger"></i> Хувийн мэдээлэл өгөхгүй байх</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showImage(index) {
+    const carousel = new bootstrap.Carousel(document.getElementById('mainImageCarousel'));
+    carousel.to(index);
+}
+
+function showContactInfo() {
+    alert('Утас: {{ ad.phone or ad.user.phone }}\nИ-мэйл: {{ ad.user.email }}');
+}
+
+function reportAd() {
+    if (confirm('Та энэ зарийг репортлохдоо итгэлтэй байна уу?')) {
+        // Here you would typically send a request to the server
+        alert('Репорт илгээгдлээ. Бид шалгаж харна.');
+    }
+}
+</script>
+{% endblock %}

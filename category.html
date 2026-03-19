@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category }} - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-th-large"></i> {{ category|title }}</h2>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="search" placeholder="Хайх..." value="{{ request.args.get('search', '') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="sort">
+                            <option value="newest">Шинээр</option>
+                            <option value="oldest">Хуучин</option>
+                            <option value="price_low">Үнэ багаас их</option>
+                            <option value="price_high">Үнэ ихээс бага</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="min_price" placeholder="Үнэ доод" value="{{ request.args.get('min_price', '') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="max_price" placeholder="Үнэ дээд" value="{{ request.args.get('max_price', '') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Хайх
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results count -->
+<div class="row mb-3">
+    <div class="col-12">
+        <p class="text-muted">Нийт {{ ads.total }} зар олдлоо</p>
+    </div>
+</div>
+
+<!-- Ads Grid -->
+<div class="row">
+    {% for ad in ads.items %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if ad.images %}
+                {% set main_image = None %}
+                {% for image in ad.images %}
+                    {% if image.is_main %}
+                        {% set main_image = image %}
+                    {% endif %}
+                {% endfor %}
+                {% if main_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + main_image.image_path) }}" class="card-img-top" alt="{{ ad.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + ad.images[0].image_path) }}" class="card-img-top" alt="{{ ad.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+            {% else %}
+                <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+            {% endif %}
+            
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ ad.title }}</h5>
+                <p class="card-text">{{ ad.description[:100] + '...' if ad.description|length > 100 else ad.description }}</p>
+                
+                <!-- Category-specific details -->
+                {% if ad.category == 'үл хөдлөх' and ad.real_estate %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            {% if ad.real_estate.area %}{{ ad.real_estate.area }} м²{% endif %}
+                            {% if ad.real_estate.rooms %}, {{ ad.real_estate.rooms }} өрөө{% endif %}
+                            {% if ad.real_estate.location %}, {{ ad.real_estate.location }}{% endif %}
+                        </small>
+                    </div>
+                {% elif ad.category == 'автомашин' and ad.automobile %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            {% if ad.automobile.year %}{{ ad.automobile.year }}{% endif %}
+                            {% if ad.automobile.manufacturer %}, {{ ad.automobile.manufacturer }}{% endif %}
+                            {% if ad.automobile.model %} {{ ad.automobile.model }}{% endif %}
+                        </small>
+                    </div>
+                {% elif ad.category == 'ажил' and ad.job %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            {% if ad.job.position %}{{ ad.job.position }}{% endif %}
+                            {% if ad.job.sector %}, {{ ad.job.sector }}{% endif %}
+                        </small>
+                    </div>
+                {% endif %}
+                
+                <div class="mt-auto">
+                    <h4 class="text-primary">
+                        {% if ad.price %}
+                            {{ "{:,.0f}".format(ad.price) }} ₮
+                        {% else %}
+                            Үнэ тохирно
+                        {% endif %}
+                    </h4>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ ad.created_at.strftime('%Y-%m-%d') }}</small>
+                        <a href="{{ url_for('ad_detail', ad_id=ad.id) }}" class="btn btn-primary btn-sm">Дэлгэрэнгүй</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if ads.pages > 1 %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if ads.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('category', category=category, page=ads.prev_num, **request.args) }}">Өмнөх</a>
+            </li>
+        {% endif %}
+        
+        {% for page_num in ads.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != ads.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('category', category=category, page=page_num, **request.args) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if ads.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('category', category=category, page=ads.next_num, **request.args) }}">Дараах</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% if ads.items|length == 0 %}
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4>Зар олдсонгүй</h4>
+            <p class="text-muted">Өөр хайлт эсвэл шүүлтүүр ашиглаад үзнэ үү.</p>
+            <a href="{{ url_for('post_ad') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Зар нэмэх
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

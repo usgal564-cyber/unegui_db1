@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ad.title }} - Засах - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-edit"></i> Зар засах</h2>
+    </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="editAdForm">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Ерөнхий мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Зарын гарчиг *</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ ad.title }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Дэлгэрэнгүй тайлбар</label>
+                        <textarea class="form-control" id="description" name="description" rows="5">{{ ad.description }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Үнэ</label>
+                                <input type="number" class="form-control" id="price" name="price" value="{{ ad.price }}" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Утас *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ ad.phone }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category-specific fields (pre-filled) -->
+            {% if ad.category == 'үл хөдлөх' and ad.real_estate %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-home"></i> Үл хөдлөх хөрөнгөний мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="area" class="form-label">Талбай (м²)</label>
+                                <input type="number" class="form-control" id="area" name="area" value="{{ ad.real_estate.area }}" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Байршил</label>
+                                <input type="text" class="form-control" id="location" name="location" value="{{ ad.real_estate.location }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="rooms" class="form-label">Өрөөний тоо</label>
+                                <input type="number" class="form-control" id="rooms" name="rooms" value="{{ ad.real_estate.rooms }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="floor" class="form-label">Давхар</label>
+                                <input type="number" class="form-control" id="floor" name="floor" value="{{ ad.real_estate.floor }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="year_built" class="form-label">Он</label>
+                                <input type="number" class="form-control" id="year_built" name="year_built" value="{{ ad.real_estate.year_built }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="condition" class="form-label">Төлөв</label>
+                                <select class="form-select" id="condition" name="condition">
+                                    <option value="">Сонгох...</option>
+                                    <option value="шинэ" {{ 'selected' if ad.real_estate.condition == 'шинэ' }}>Шинэ</option>
+                                    <option value="хуучин" {{ 'selected' if ad.real_estate.condition == 'хуучин' }}>Хуучин</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="garage" name="garage" {{ 'checked' if ad.real_estate.garage }}>
+                            <label class="form-check-label" for="garage">Гарааштай</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if ad.category == 'автомашин' and ad.automobile %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-car"></i> Автомашины мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="manufacturer" class="form-label">Үйлдвэрлэгч</label>
+                                <input type="text" class="form-control" id="manufacturer" name="manufacturer" value="{{ ad.automobile.manufacturer }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Загвар</label>
+                                <input type="text" class="form-control" id="model" name="model" value="{{ ad.automobile.model }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="year" class="form-label">Он</label>
+                                <input type="number" class="form-control" id="year" name="year" value="{{ ad.automobile.year }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Төрөл</label>
+                                <select class="form-select" id="type" name="type">
+                                    <option value="">Сонгох...</option>
+                                    <option value="жижиг" {{ 'selected' if ad.automobile.type == 'жижиг' }}>Жижиг</option>
+                                    <option value="жийп" {{ 'selected' if ad.automobile.type == 'жийп' }}>Жийп</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="engine_capacity" class="form-label">Моторын багтаамж (л)</label>
+                                <input type="number" class="form-control" id="engine_capacity" name="engine_capacity" value="{{ ad.automobile.engine_capacity }}" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="doors" class="form-label">Хаалганы тоо</label>
+                                <input type="number" class="form-control" id="doors" name="doors" value="{{ ad.automobile.doors }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="drive_type" class="form-label">Хөтлөгч</label>
+                                <select class="form-select" id="drive_type" name="drive_type">
+                                    <option value="">Сонгох...</option>
+                                    <option value="урагшаа" {{ 'selected' if ad.automobile.drive_type == 'урагшаа' }}>Урагшаа</option>
+                                    <option value="хойд" {{ 'selected' if ad.automobile.drive_type == 'хойд' }}>Хойд</option>
+                                    <option value="бүх дугуй" {{ 'selected' if ad.automobile.drive_type == 'бүх дугуй' }}>Бүх дугуй</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="transmission" class="form-label">Хүрдний байрлал</label>
+                                <select class="form-select" id="transmission" name="transmission">
+                                    <option value="">Сонгох...</option>
+                                    <option value="механик" {{ 'selected' if ad.automobile.transmission == 'механик' }}>Механик</option>
+                                    <option value="автомат" {{ 'selected' if ad.automobile.transmission == 'автомат' }}>Автомат</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="fuel_type" class="form-label">Түлш</label>
+                                <select class="form-select" id="fuel_type" name="fuel_type">
+                                    <option value="">Сонгох...</option>
+                                    <option value="бензин" {{ 'selected' if ad.automobile.fuel_type == 'бензин' }}>Бензин</option>
+                                    <option value="дизель" {{ 'selected' if ad.automobile.fuel_type == 'дизель' }}>Дизель</option>
+                                    <option value="цахилгаан" {{ 'selected' if ad.automobile.fuel_type == 'цахилгаан' }}>Цахилгаан</option>
+                                    <option value="гибрид" {{ 'selected' if ad.automobile.fuel_type == 'гибрид' }}>Гибрид</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="mileage" class="form-label">Гүйлт (км)</label>
+                                <input type="number" class="form-control" id="mileage" name="mileage" value="{{ ad.automobile.mileage }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="has_plate" name="has_plate" {{ 'checked' if ad.automobile.has_plate }}>
+                            <label class="form-check-label" for="has_plate">Улсын дугаартай</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if ad.category == 'ажил' and ad.job %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-briefcase"></i> Ажлын мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sector" class="form-label">Салбар</label>
+                                <input type="text" class="form-control" id="sector" name="sector" value="{{ ad.job.sector }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sub_sector" class="form-label">Дэд салбар</label>
+                                <input type="text" class="form-control" id="sub_sector" name="sub_sector" value="{{ ad.job.sub_sector }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="position" class="form-label">Албан тушаал</label>
+                                <input type="text" class="form-control" id="position" name="position" value="{{ ad.job.position }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="salary" class="form-label">Цалин</label>
+                                <input type="number" class="form-control" id="salary" name="salary" value="{{ ad.job.salary }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="requirements" class="form-label">Тавигдах шаардлага</label>
+                        <textarea class="form-control" id="requirements" name="requirements" rows="3">{{ ad.job.requirements }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="degree" class="form-label">Боловсролын зэрэг</label>
+                                <select class="form-select" id="degree" name="degree">
+                                    <option value="">Сонгох...</option>
+                                    <option value="бакалавр" {{ 'selected' if ad.job.degree == 'бакалавр' }}>Бакалавр</option>
+                                    <option value="магистр" {{ 'selected' if ad.job.degree == 'магистр' }}>Магистр</option>
+                                    <option value="доктор" {{ 'selected' if ad.job.degree == 'доктор' }}>Доктор</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="experience" class="form-label">Туршлага</label>
+                                <select class="form-select" id="experience" name="experience">
+                                    <option value="">Сонгох...</option>
+                                    <option value="туршлагагүй" {{ 'selected' if ad.job.experience == 'туршлагагүй' }}>Туршлагагүй</option>
+                                    <option value="1-3 жил" {{ 'selected' if ad.job.experience == '1-3 жил' }}>1-3 жил</option>
+                                    <option value="3-5 жил" {{ 'selected' if ad.job.experience == '3-5 жил' }}>3-5 жил</option>
+                                    <option value="5+ жил" {{ 'selected' if ad.job.experience == '5+ жил' }}>5+ жил</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Байршил</label>
+                                <input type="text" class="form-control" id="location" name="location" value="{{ ad.job.location }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Additional Images -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-images"></i> Нэмэлт зураг оруулах</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Зурагнууд</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <div class="form-text">Шинэ зураг оруулж болно.</div>
+                    </div>
+                    
+                    <!-- Current images -->
+                    {% if ad.images %}
+                        <h6>Одоогийн зурагнууд:</h6>
+                        <div class="row">
+                            {% for image in ad.images %}
+                                <div class="col-md-3 mb-2">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.image_path) }}" class="img-thumbnail" alt="Current image" style="height: 80px; object-fit: cover;">
+                                    {% if image.is_main %}
+                                        <small class="d-block text-center text-primary">Гол зураг</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div id="imagePreview" class="row"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Үйлдэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Хадгалах
+                        </button>
+                        <a href="{{ url_for('ad_detail', ad_id=ad.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Буцах
+                        </a>
+                        <button type="button" class="btn btn-danger" onclick="deleteAd({{ ad.id }})">
+                            <i class="fas fa-trash"></i> Устгах
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Image preview
+document.getElementById('images').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'col-md-4 mb-2';
+            div.innerHTML = `
+                <img src="${e.target.result}" class="img-fluid img-thumbnail" alt="Preview ${i+1}">
+                <small class="d-block text-center">${file.name}</small>
+            `;
+            preview.appendChild(div);
+        }
+        
+        reader.readAsDataURL(file);
+    }
+});
+
+function deleteAd(adId) {
+    if (confirm('Та энэ зарыг устгахдаа итгэлтэй байна уу? Үйлдэл буцаахгүй!')) {
+        fetch(`/ad/${adId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '{{ url_for("my_ads") }}';
+            } else {
+                alert('Алдаа гарлаа: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Алдаа гарлаа. Дахин оролдоно уу.');
+        });
+    }
+}
+</script>
+{% endblock %}

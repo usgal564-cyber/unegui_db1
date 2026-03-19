@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Зар нэмэх - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-plus-circle"></i> Зар нэмэх</h2>
+    </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="adForm">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Ерөнхий мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Ангилал *</label>
+                        <select class="form-select" id="category" name="category" required onchange="toggleCategoryFields()">
+                            <option value="">Сонгох...</option>
+                            <option value="үл хөдлөх">Үл хөдлөх хөрөнгө</option>
+                            <option value="автомашин">Автомашин</option>
+                            <option value="ажил">Ажил, ажилд авна</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Зарын гарчиг *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Дэлгэрэнгүй тайлбар</label>
+                        <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Үнэ</label>
+                                <input type="number" class="form-control" id="price" name="price" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Утас *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real Estate Fields -->
+            <div class="card mb-4" id="realEstateFields" style="display: none;">
+                <div class="card-header">
+                    <h5><i class="fas fa-home"></i> Үл хөдлөх хөрөнгөний мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="area" class="form-label">Талбай (м²)</label>
+                                <input type="number" class="form-control" id="area" name="area" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Байршил</label>
+                                <input type="text" class="form-control" id="location" name="location">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="rooms" class="form-label">Өрөөний тоо</label>
+                                <input type="number" class="form-control" id="rooms" name="rooms">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="floor" class="form-label">Давхар</label>
+                                <input type="number" class="form-control" id="floor" name="floor">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="year_built" class="form-label">Он</label>
+                                <input type="number" class="form-control" id="year_built" name="year_built">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="condition" class="form-label">Төлөв</label>
+                                <select class="form-select" id="condition" name="condition">
+                                    <option value="">Сонгох...</option>
+                                    <option value="шинэ">Шинэ</option>
+                                    <option value="хуучин">Хуучин</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="garage" name="garage">
+                            <label class="form-check-label" for="garage">Гарааштай</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Automobile Fields -->
+            <div class="card mb-4" id="automobileFields" style="display: none;">
+                <div class="card-header">
+                    <h5><i class="fas fa-car"></i> Автомашины мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="manufacturer" class="form-label">Үйлдвэрлэгч</label>
+                                <input type="text" class="form-control" id="manufacturer" name="manufacturer">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Загвар</label>
+                                <input type="text" class="form-control" id="model" name="model">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="year" class="form-label">Он</label>
+                                <input type="number" class="form-control" id="year" name="year">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Төрөл</label>
+                                <select class="form-select" id="type" name="type">
+                                    <option value="">Сонгох...</option>
+                                    <option value="жижиг">Жижиг</option>
+                                    <option value="жийп">Жийп</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="engine_capacity" class="form-label">Моторын багтаамж (л)</label>
+                                <input type="number" class="form-control" id="engine_capacity" name="engine_capacity" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="doors" class="form-label">Хаалганы тоо</label>
+                                <input type="number" class="form-control" id="doors" name="doors">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="drive_type" class="form-label">Хөтлөгч</label>
+                                <select class="form-select" id="drive_type" name="drive_type">
+                                    <option value="">Сонгох...</option>
+                                    <option value="урагшаа">Урагшаа</option>
+                                    <option value="хойд">Хойд</option>
+                                    <option value="бүх дугуй">Бүх дугуй</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="transmission" class="form-label">Хүрдний байрлал</label>
+                                <select class="form-select" id="transmission" name="transmission">
+                                    <option value="">Сонгох...</option>
+                                    <option value="механик">Механик</option>
+                                    <option value="автомат">Автомат</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="fuel_type" class="form-label">Түлш</label>
+                                <select class="form-select" id="fuel_type" name="fuel_type">
+                                    <option value="">Сонгох...</option>
+                                    <option value="бензин">Бензин</option>
+                                    <option value="дизель">Дизель</option>
+                                    <option value="цахилгаан">Цахилгаан</option>
+                                    <option value="гибрид">Гибрид</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="mileage" class="form-label">Гүйлт (км)</label>
+                                <input type="number" class="form-control" id="mileage" name="mileage">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="has_plate" name="has_plate">
+                            <label class="form-check-label" for="has_plate">Улсын дугаартай</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Fields -->
+            <div class="card mb-4" id="jobFields" style="display: none;">
+                <div class="card-header">
+                    <h5><i class="fas fa-briefcase"></i> Ажлын мэдээлэл</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sector" class="form-label">Салбар</label>
+                                <input type="text" class="form-control" id="sector" name="sector">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sub_sector" class="form-label">Дэд салбар</label>
+                                <input type="text" class="form-control" id="sub_sector" name="sub_sector">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="position" class="form-label">Албан тушаал</label>
+                                <input type="text" class="form-control" id="position" name="position">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="salary" class="form-label">Цалин</label>
+                                <input type="number" class="form-control" id="salary" name="salary">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="requirements" class="form-label">Тавигдах шаардлага</label>
+                        <textarea class="form-control" id="requirements" name="requirements" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="degree" class="form-label">Боловсролын зэрэг</label>
+                                <select class="form-select" id="degree" name="degree">
+                                    <option value="">Сонгох...</option>
+                                    <option value="бакалавр">Бакалавр</option>
+                                    <option value="магистр">Магистр</option>
+                                    <option value="доктор">Доктор</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="experience" class="form-label">Туршлага</label>
+                                <select class="form-select" id="experience" name="experience">
+                                    <option value="">Сонгох...</option>
+                                    <option value="туршлагагүй">Туршлагагүй</option>
+                                    <option value="1-3 жил">1-3 жил</option>
+                                    <option value="3-5 жил">3-5 жил</option>
+                                    <option value="5+ жил">5+ жил</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Байршил</label>
+                                <input type="text" class="form-control" id="location" name="location">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-images"></i> Зураг оруулах</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Зурагнууд (доод тал нь 1 зураг)</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <div class="form-text">Олон зураг сонгож болно. Эхний зураг гол зураг болно.</div>
+                    </div>
+                    <div id="imagePreview" class="row"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Зарын дүрэм</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Зөвхөн үнэн зөв мэдээлэл оруулах</li>
+                        <li><i class="fas fa-check text-success"></i> Чанартай зураг оруулах</li>
+                        <li><i class="fas fa-check text-success"></i> Үнэлгээг шударга тогтоох</li>
+                        <li><i class="fas fa-times text-danger"></i> Хууль бус бүтээгдэхүүн зарлахгүй</li>
+                        <li><i class="fas fa-times text-danger"></i> Худал мэдээлэл оруулахгүй</li>
+                    </ul>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane"></i> Зар нэмэх
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Буцах
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleCategoryFields() {
+    const category = document.getElementById('category').value;
+    
+    // Hide all category-specific fields
+    document.getElementById('realEstateFields').style.display = 'none';
+    document.getElementById('automobileFields').style.display = 'none';
+    document.getElementById('jobFields').style.display = 'none';
+    
+    // Show relevant fields
+    if (category === 'үл хөдлөх') {
+        document.getElementById('realEstateFields').style.display = 'block';
+    } else if (category === 'автомашин') {
+        document.getElementById('automobileFields').style.display = 'block';
+    } else if (category === 'ажил') {
+        document.getElementById('jobFields').style.display = 'block';
+    }
+}
+
+// Image preview
+document.getElementById('images').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'col-md-4 mb-2';
+            div.innerHTML = `
+                <img src="${e.target.result}" class="img-fluid img-thumbnail" alt="Preview ${i+1}">
+                <small class="d-block text-center">${file.name}</small>
+            `;
+            preview.appendChild(div);
+        }
+        
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form validation
+document.getElementById('adForm').addEventListener('submit', function(e) {
+    const category = document.getElementById('category').value;
+    const images = document.getElementById('images').files;
+    
+    if (!category) {
+        e.preventDefault();
+        alert('Ангилал сонгоно уу!');
+        return;
+    }
+    
+    if (images.length === 0) {
+        e.preventDefault();
+        alert('Доод тал нь 1 зураг оруулна уу!');
+        return;
+    }
+});
+</script>
+{% endblock %}

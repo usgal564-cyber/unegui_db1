@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Нүүр хуудас - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+            <h1 class="display-4">Монголын хамгийн том зарын платформ</h1>
+            <p class="lead">Үл хөдлөх хөрөнгө, автомашин, ажлын байр зэрэг бүх төрлийн зар</p>
+            <a class="btn btn-light btn-lg" href="{{ url_for('post_ad') }}" role="button">
+                <i class="fas fa-plus-circle"></i> Зар нэмэх
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Ангиллаар хайх</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-home fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Үл хөдлөх хөрөнгө</h5>
+                <p class="card-text">Орон сууц, байшин, газар</p>
+                <a href="{{ url_for('category', category='үл хөдлөх') }}" class="btn btn-primary">Үзэх</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-car fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Автомашин</h5>
+                <p class="card-text">Шинэ, хуучин автомашинууд</p>
+                <a href="{{ url_for('category', category='автомашин') }}" class="btn btn-success">Үзэх</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-briefcase fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Ажил, ажилд авна</h5>
+                <p class="card-text">Ажлын байрууд</p>
+                <a href="{{ url_for('category', category='ажил') }}" class="btn btn-warning">Үзэх</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Сүүлийн үеийн зарууд</h2>
+    </div>
+</div>
+
+<div class="row" id="latest-ads">
+    <!-- Latest ads will be loaded here via JavaScript -->
+</div>
+
+<div class="row">
+    <div class="col-12 text-center">
+        <button class="btn btn-outline-primary" onclick="loadLatestAds()">
+            <i class="fas fa-refresh"></i> Цааш үзэх
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function loadLatestAds() {
+    fetch('/api/latest-ads')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('latest-ads');
+            container.innerHTML = '';
+            
+            data.ads.forEach(ad => {
+                const adCard = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="${ad.main_image || '/static/images/no-image.png'}" class="card-img-top" alt="${ad.title}">
+                            <div class="card-body">
+                                <h5 class="card-title">${ad.title}</h5>
+                                <p class="card-text">${ad.description ? ad.description.substring(0, 100) + '...' : ''}</p>
+                                <p class="card-text"><strong>${ad.price ? ad.price.toLocaleString() + ' ₮' : 'Үнэ тохирно'}</strong></p>
+                                <p class="card-text"><small class="text-muted">${new Date(ad.created_at).toLocaleDateString('mn-MN')}</small></p>
+                                <a href="/ad/${ad.id}" class="btn btn-primary">Дэлгэрэнгүй</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += adCard;
+            });
+        })
+        .catch(error => {
+            console.error('Error loading latest ads:', error);
+        });
+}
+
+// Load latest ads when page loads
+document.addEventListener('DOMContentLoaded', loadLatestAds);
+</script>
+{% endblock %}

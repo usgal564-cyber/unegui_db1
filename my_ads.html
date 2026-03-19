@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Миний зарууд - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-list"></i> Миний зарууд</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if ads.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Зураг</th>
+                                    <th>Гарчиг</th>
+                                    <th>Ангилал</th>
+                                    <th>Үнэ</th>
+                                    <th>Огноо</th>
+                                    <th>Төлөв</th>
+                                    <th>Үйлдэл</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ad in ads.items %}
+                                <tr>
+                                    <td>
+                                        {% if ad.images %}
+                                            {% set main_image = None %}
+                                            {% for image in ad.images %}
+                                                {% if image.is_main %}
+                                                    {% set main_image = image %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if main_image %}
+                                                <img src="{{ url_for('static', filename='uploads/' + main_image.image_path) }}" alt="{{ ad.title }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                                <img src="{{ url_for('static', filename='uploads/' + ad.images[0].image_path) }}" alt="{{ ad.title }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('ad_detail', ad_id=ad.id) }}" class="text-decoration-none">
+                                            {{ ad.title }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ ad.category }}</span>
+                                    </td>
+                                    <td>
+                                        {% if ad.price %}
+                                            {{ "{:,.0f}".format(ad.price) }} ₮
+                                        {% else %}
+                                            Үнэ тохирно
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ ad.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if ad.is_active %}
+                                            <span class="badge bg-success">Идэвхтэй</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Идэвхгүй</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('edit_ad', ad_id=ad.id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger" onclick="deleteAd({{ ad.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% if ad.is_active %}
+                                                <button class="btn btn-outline-warning" onclick="toggleAdStatus({{ ad.id }}, false)">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            {% else %}
+                                                <button class="btn btn-outline-success" onclick="toggleAdStatus({{ ad.id }}, true)">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if ads.pages > 1 %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if ads.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('my_ads', page=ads.prev_num) }}">Өмнөх</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in ads.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != ads.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('my_ads', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if ads.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('my_ads', page=ads.next_num) }}">Дараах</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h4>Та одоогоор зар оруулаагүй байна</h4>
+                        <p class="text-muted">Эхний зарaa оруулж эхэлнэ үү.</p>
+                        <a href="{{ url_for('post_ad') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Зар нэмэх
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteAd(adId) {
+    if (confirm('Та энэ зарыг устгахдаа итгэлтэй байна уу? Үйлдэл буцаахгүй!')) {
+        fetch(`/ad/${adId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}' if csrf_token else ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Алдаа гарлаа: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Алдаа гарлаа. Дахин оролдоно уу.');
+        });
+    }
+}
+
+function toggleAdStatus(adId, status) {
+    const action = status ? 'activate' : 'deactivate';
+    const confirmMessage = status ? 'Та энэ зарыг идэвхжүүлэхдээ итгэлтэй байна уу?' : 'Та энэ зарыг идэвхгүй болгохдоо итгэлтэй байна уу?';
+    
+    if (confirm(confirmMessage)) {
+        fetch(`/ad/${adId}/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}' if csrf_token else ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Алдаа гарлаа: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Алдаа гарлаа. Дахин оролдоно уу.');
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль - Зарын Сайт{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-user"></i> Миний профиль</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_profile') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Хэрэглэгчийн нэр</label>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">И-мэйл</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Утас</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}" placeholder="9999-9999">
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Нууц үг солих</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Одоогийн нууц үг</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">Шинэ нууц үг</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password" minlength="6">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Шинэ нууц үгээ давтах</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Хадгалах
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Статистик</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ user.advertisements|length }}</h4>
+                        <small class="text-muted">Нийт зар</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ user.advertisations|selectattr('is_active')|list|length }}</h4>
+                        <small class="text-muted">Идэвхтэй зар</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <small class="text-muted">Бүртгүүлсэн огноо</small>
+                    <p>{{ user.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Түргэн холбоос</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('my_ads') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> Миний зарууд
+                    </a>
+                    <a href="{{ url_for('post_ad') }}" class="btn btn-outline-success">
+                        <i class="fas fa-plus-circle"></i> Шинэ зар
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt"></i> Гарах
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const currentPassword = document.getElementById('current_password').value;
+    
+    if (newPassword || confirmPassword || currentPassword) {
+        if (!currentPassword) {
+            e.preventDefault();
+            alert('Одоогийн нууц үгээ оруулна уу!');
+            return false;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            e.preventDefault();
+            alert('Шинэ нууц үгүүд таарахгүй байна!');
+            return false;
+        }
+        
+        if (newPassword.length < 6) {
+            e.preventDefault();
+            alert('Шинэ нууц үг доод тал нь 6 тэмдэгт байх ёстой!');
+            return false;
+        }
+    }
+});
+</script>
+{% endblock %}
